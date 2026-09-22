@@ -1,0 +1,36 @@
+<div
+  class="overflow-auto rounded-[var(--radius-control)] ring-1 ring-inset ring-line"
+  [style.height.px]="viewportHeight"
+  (scroll)="onScroll($event)"
+  role="list"
+  aria-label="Bulk payment rows"
+>
+  <div [style.height.px]="totalHeight()">
+    <div [style.transform]="'translateY(' + range().offsetY + 'px)'">
+      @for (row of windowRows(); track row.lineNumber) {
+        <div
+          class="flex items-center gap-4 border-b border-line px-4 text-sm"
+          [style.height.px]="itemHeight"
+          role="listitem"
+          data-bulk-row
+        >
+          <span
+            class="h-2 w-2 shrink-0 rounded-full"
+            [class.bg-state-approved]="row.errors.length === 0"
+            [class.bg-state-rejected]="row.errors.length > 0"
+            aria-hidden="true"
+          ></span>
+          <span class="w-12 shrink-0 font-mono tabular-nums text-muted">
+            {{ row.lineNumber }}
+          </span>
+          <span class="w-36 shrink-0 truncate font-mono text-ink" [title]="row.clientReference">
+            {{ row.clientReference }}
+          </span>
+          <span class="min-w-0 flex-1 truncate text-muted" [title]="rowMessages(row)">
+            {{ rowMessages(row) }}
+          </span>
+        </div>
+      }
+    </div>
+  </div>
+</div>

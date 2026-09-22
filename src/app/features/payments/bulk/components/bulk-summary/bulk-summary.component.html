@@ -1,0 +1,61 @@
+<div class="space-y-4">
+  <div class="flex flex-wrap items-center justify-between gap-2">
+    <h2 class="section-title">{{ fileName() }}</h2>
+    <div class="segmented" role="group" aria-label="Filter rows">
+      <button
+        type="button"
+        class="segmented-item"
+        [class.is-active]="!invalidOnly()"
+        [attr.aria-pressed]="!invalidOnly()"
+        (click)="invalidOnlyChange.emit(false)"
+      >
+        All rows
+      </button>
+      <button
+        type="button"
+        class="segmented-item"
+        [class.is-active]="invalidOnly()"
+        [attr.aria-pressed]="invalidOnly()"
+        (click)="invalidOnlyChange.emit(true)"
+      >
+        Invalid only
+      </button>
+    </div>
+  </div>
+
+  <dl class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+    <div>
+      <dt class="text-xs font-medium uppercase tracking-wide text-muted">Total rows</dt>
+      <dd class="mt-1 text-lg font-semibold tabular-nums text-ink">{{ summary().totalRows }}</dd>
+    </div>
+    <div>
+      <dt class="text-xs font-medium uppercase tracking-wide text-muted">Valid rows</dt>
+      <dd class="mt-1 text-lg font-semibold tabular-nums text-state-approved">
+        {{ summary().validRows }}
+      </dd>
+    </div>
+    <div>
+      <dt class="text-xs font-medium uppercase tracking-wide text-muted">Invalid rows</dt>
+      <dd class="mt-1 text-lg font-semibold tabular-nums text-state-rejected">
+        {{ summary().invalidRows }}
+      </dd>
+    </div>
+    <div>
+      <dt class="text-xs font-medium uppercase tracking-wide text-muted">Duplicate references</dt>
+      <dd class="mt-1 text-lg font-semibold tabular-nums text-ink">
+        {{ summary().duplicateClientReferenceCount }}
+      </dd>
+    </div>
+  </dl>
+
+  <div class="flex flex-col gap-1">
+    <span class="text-xs font-medium uppercase tracking-wide text-muted">Amount by currency</span>
+    <p class="text-sm font-medium text-ink">
+      @if (summary().amountByCurrency.length === 0) {
+        none
+      } @else {
+        {{ amountLabel() }}
+      }
+    </p>
+  </div>
+</div>
