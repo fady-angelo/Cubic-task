@@ -1,0 +1,54 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Payment work queue</h1>
+      <p class="page-lede">{{ queueDescription() }}</p>
+    </div>
+    @if (canCreatePayment() || canUploadBulk()) {
+      <div class="page-actions">
+        @if (canCreatePayment()) {
+          <a routerLink="/payments/new" class="btn-primary">New payment</a>
+        }
+        @if (canUploadBulk()) {
+          <a routerLink="/payments/bulk" class="btn-secondary">Upload bulk payments</a>
+        }
+      </div>
+    }
+  </div>
+
+  <app-payment-queue-filters
+    [form]="filterForm"
+    [statusOptions]="statusOptions()"
+    [typeOptions]="typeOptions()"
+    [hasValues]="hasFilterValues()"
+  />
+
+  @if (errorMessage(); as message) {
+    <app-error-state [message]="message" (retry)="retry()" />
+  } @else {
+    <div class="panel">
+      <app-payment-queue-table
+        [payments]="payments()"
+        [columns]="columns"
+        [sortField]="sortField()"
+        [loading]="loading()"
+        [sortDirection]="sortDirection()"
+        (sort)="sort($event)"
+        (openPayment)="openPayment($event)"
+      />
+
+      @if (showPagination()) {
+        <app-pagination
+          [currentPage]="currentPage()"
+          [totalPages]="totalPages()"
+          [total]="total()"
+          [rangeStart]="rangeStart()"
+          [rangeEnd]="rangeEnd()"
+          [pageItems]="pageItems()"
+          itemLabel="payments"
+          (goToPage)="goToPage($event)"
+        />
+      }
+    </div>
+  }
+</div>

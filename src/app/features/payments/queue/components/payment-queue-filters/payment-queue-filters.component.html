@@ -1,0 +1,84 @@
+<section class="panel panel-pad mb-4" aria-label="Filter payments">
+  <form [formGroup]="form()" class="space-y-4">
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <h2 class="text-sm font-semibold text-ink">Filters</h2>
+      @if (hasValues()) {
+        <button type="button" class="btn-ghost h-8 px-2 text-xs" (click)="clear()">
+          Clear filters
+        </button>
+      }
+    </div>
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7">
+      <div class="xl:col-span-2">
+        <label class="field-label" for="queue-search">Search</label>
+        <input
+          id="queue-search"
+          formControlName="search"
+          type="search"
+          name="q"
+          autocomplete="off"
+          placeholder="Reference or beneficiary"
+          class="field"
+        />
+      </div>
+
+      <div class="form-row">
+        <label class="field-label" for="queue-status">Status</label>
+        <select id="queue-status" formControlName="status" name="status" class="field">
+          <option value="">All statuses</option>
+          @for (status of statusOptions(); track status.value) {
+            <option [value]="status.value">{{ status.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label class="field-label" for="queue-type">Payment type</label>
+        <select id="queue-type" formControlName="type" name="type" class="field">
+          <option value="">All types</option>
+          @for (type of typeOptions(); track type.value) {
+            <option [value]="type.value">{{ type.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label class="field-label" for="queue-currency">Currency</label>
+        <input
+          id="queue-currency"
+          formControlName="currency"
+          type="text"
+          name="currency"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="USD"
+          maxlength="3"
+          class="field uppercase"
+        />
+      </div>
+
+      <div class="form-row">
+        <label class="field-label" for="queue-date-from">Created from</label>
+        <input
+          id="queue-date-from"
+          formControlName="dateFrom"
+          type="date"
+          name="dateFrom"
+          autocomplete="off"
+          class="field"
+        />
+      </div>
+      <div class="form-row">
+        <label class="field-label" for="queue-date-to">Created to</label>
+        <input
+          id="queue-date-to"
+          formControlName="dateTo"
+          type="date"
+          name="dateTo"
+          autocomplete="off"
+          class="field"
+        />
+      </div>
+    </div>
+  </form>
+</section>

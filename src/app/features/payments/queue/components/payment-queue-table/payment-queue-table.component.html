@@ -1,0 +1,56 @@
+<app-table
+  [rows]="payments()"
+  [columns]="columns()"
+  [sortField]="sortField()"
+  [sortDirection]="sortDirection()"
+  [loading]="loading()"
+  loadingLabel="Loading payments…"
+  [rowClickable]="true"
+  (sort)="sort.emit($event)"
+  (rowClick)="openPayment.emit($event.id)"
+>
+  <div dataTableEmpty>
+    <p class="text-base font-medium text-ink">No payments found</p>
+    <p class="mt-1 text-sm text-muted">Try adjusting your filters or search term.</p>
+  </div>
+
+  <ng-template #rowCells let-payment>
+    <td class="whitespace-nowrap px-4 py-2.5">
+      <a
+        [routerLink]="['/payments', payment.id]"
+        class="font-mono text-sm font-medium text-accent hover:text-accent-hover"
+        >{{ payment.reference }}</a
+      >
+    </td>
+    <td class="whitespace-nowrap px-4 py-2.5 font-mono text-sm text-muted">
+      {{ payment.debtorAccountMasked }}
+    </td>
+    <td
+      class="max-w-[180px] truncate px-4 py-2.5 text-sm text-ink"
+      [title]="payment.beneficiaryName"
+    >
+      {{ payment.beneficiaryName }}
+    </td>
+    <td class="whitespace-nowrap px-4 py-2.5 text-sm text-muted">
+      {{ payment.type.label }}
+    </td>
+    <td class="whitespace-nowrap px-4 py-2.5 text-sm font-medium text-ink">
+      {{ payment.currency }}
+    </td>
+    <td class="whitespace-nowrap px-4 py-2.5 text-right text-sm font-medium tabular-nums text-ink">
+      {{ payment.amount | number: '1.2-2' }}
+    </td>
+    <td class="whitespace-nowrap px-4 py-2.5">
+      <span class="badge" [ngClass]="payment.status.value | statusBadge">
+        {{ payment.status.label }}
+      </span>
+    </td>
+    <td class="whitespace-nowrap px-4 py-2.5 text-sm text-muted">{{ payment.makerName }}</td>
+    <td class="whitespace-nowrap px-4 py-2.5 text-sm text-muted">
+      {{ payment.createdAt | date: 'd MMM y' }}
+    </td>
+    <td class="whitespace-nowrap px-4 py-2.5 text-sm text-muted">
+      {{ payment.updatedAt | date: 'd MMM y, HH:mm' }}
+    </td>
+  </ng-template>
+</app-table>
