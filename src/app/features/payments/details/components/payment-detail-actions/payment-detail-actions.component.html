@@ -1,0 +1,118 @@
+@if (hasMakerActions() || canDecide()) {
+  <section class="panel">
+    <div class="panel-pad space-y-5">
+      <h2 class="section-title">Actions</h2>
+
+      @if (hasMakerActions()) {
+        <div class="space-y-3">
+          <h3 class="text-xs font-semibold uppercase tracking-wide text-muted">Maker</h3>
+          <div class="flex flex-wrap gap-2">
+            @if (canEdit()) {
+              <a [routerLink]="['/payments', paymentId(), 'edit']" class="btn-secondary">
+                Edit draft
+              </a>
+            }
+            @if (canSubmit()) {
+              <button
+                type="button"
+                class="btn-primary"
+                [disabled]="busy()"
+                (click)="action.emit({ type: 'submit' })"
+              >
+                Submit
+              </button>
+            }
+            @if (canCancel()) {
+              <button
+                type="button"
+                class="btn-secondary"
+                [disabled]="busy()"
+                (click)="action.emit({ type: 'cancelDraft' })"
+              >
+                Cancel draft
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      @if (canDecide()) {
+        <div class="space-y-3">
+          <h3 class="text-xs font-semibold uppercase tracking-wide text-muted">Checker</h3>
+          <p class="max-w-prose text-sm text-muted">
+            Approve, return, or reject this payment. A Checker cannot approve a payment created by
+            the same user.
+          </p>
+          <div class="flex flex-wrap gap-2">
+            <button
+              type="button"
+              class="btn-primary"
+              [disabled]="busy() || selfApprovalBlocked()"
+              (click)="openPrompt('approve')"
+            >
+              Approve
+            </button>
+            <button
+              type="button"
+              class="btn-secondary"
+              [disabled]="busy()"
+              (click)="openPrompt('return')"
+            >
+              Return
+            </button>
+            <button
+              type="button"
+              class="btn-danger"
+              [disabled]="busy()"
+              (click)="openPrompt('reject')"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+      }
+
+      @if (pendingPrompt() === 'approve') {
+        <div class="alert alert-warning space-y-3" role="dialog" aria-label="Confirm approval">
+          <p class="text-ink">Approve this payment? This cannot be undone from the queue.</p>
+          <div class="flex flex-wrap gap-2">
+            <button
+              type="button"
+              class="btn-primary"
+              [disabled]="busy()"
+              (click)="confirmApprove()"
+            >
+              Confirm approve
+            </button>
+            <button type="button" class="btn-ghost" [disabled]="busy()" (click)="closePrompt()">
+              Cancel
+            </button>
+          </div>
+        </div>
+      }
+
+      @if (reasonPrompt(); as prompt) {
+        <form [formGroup]="reasonForm" (ngSubmit)="confirmReason()" class="space-y-3">
+          <div class="form-row">
+            <label class="field-label is-required" for="decision-reason">Reason to {{ prompt }}</label>
+            <textarea
+              id="decision-reason"
+              class="field min-h-24 py-2"
+              formControlName="reason"
+              rows="3"
+            ></textarea>
+            @if (reasonForm.controls.reason.touched && reasonForm.controls.reason.invalid) {
+              <p class="field-error" role="alert">A reason is required.</p>
+            }
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button type="submit" class="btn-primary" [disabled]="busy()">
+              Confirm {{ prompt }}
+            </button>
+            <button type="button" class="btn-ghost" (click)="closePrompt()">Cancel</button>
+          </div>
+        </form>
+      }
+    </div>
+  </section>
+}

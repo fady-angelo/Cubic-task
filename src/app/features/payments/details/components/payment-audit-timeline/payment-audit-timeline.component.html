@@ -1,0 +1,22 @@
+<section class="panel">
+  <div class="panel-pad">
+    <h2 class="section-title">Audit timeline</h2>
+    @if (events().length === 0) {
+      <p class="text-sm text-muted">No audit events.</p>
+    } @else {
+      <ol class="timeline">
+        @for (event of events(); track $index) {
+          <li class="timeline-item" [class.is-active]="$last">
+            <p class="text-sm font-medium text-ink">{{ event.event }}</p>
+            <p class="text-sm text-muted">
+              {{ event.actorName }} · {{ event.at | date: 'd MMM y, HH:mm' }}
+            </p>
+            @if (event.reason) {
+              <p class="mt-1 text-sm text-ink">{{ event.reason }}</p>
+            }
+          </li>
+        }
+      </ol>
+    }
+  </div>
+</section>

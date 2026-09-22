@@ -1,0 +1,162 @@
+<div class="page-narrow space-y-6">
+  <a routerLink="/payments" class="back-link">Back to queue</a>
+
+  @if (errorMessage(); as message) {
+    <app-error-state [message]="message" (retry)="retry()" />
+  } @else if (loading() && !payment()) {
+    <p class="page-lede">Loading payment…</p>
+  } @else if (payment(); as payment) {
+    <header class="page-header">
+      <div class="space-y-2">
+        <div class="flex flex-wrap items-center gap-3">
+          <h1 class="page-title">{{ payment.reference }}</h1>
+          <span class="badge" [ngClass]="payment.status.value | statusBadge">
+            {{ payment.status.label }}
+          </span>
+          <span class="font-mono text-xs text-muted">rowVersion {{ payment.rowVersion }}</span>
+        </div>
+        <p class="amount-display">{{ payment.currency }} {{ payment.amount | number: '1.2-2' }}</p>
+        <p class="page-lede">
+          {{ payment.type.label }} · Maker {{ payment.makerName }}
+          @if (payment.executionDate) {
+            · Executes {{ payment.executionDate | date: 'd MMM y' }}
+          }
+        </p>
+      </div>
+    </header>
+
+    @if (staleNotice()) {
+      <p class="alert alert-warning" role="alert">
+        This payment was updated elsewhere. The latest state has been loaded. Review it before
+        trying again.
+      </p>
+    }
+
+    @if (actionError(); as actionMessage) {
+      <p class="alert alert-danger" role="alert">
+        {{ actionMessage }}
+      </p>
+    }
+
+    <section class="panel">
+      <div class="panel-pad">
+        <h2 class="section-title">Summary</h2>
+        <dl class="detail-grid">
+          <div>
+            <dt>Reference</dt>
+            <dd class="font-mono">{{ payment.reference }}</dd>
+          </div>
+          <div>
+            <dt>Type</dt>
+            <dd>{{ payment.type.label }}</dd>
+          </div>
+          <div>
+            <dt>Maker</dt>
+            <dd>{{ payment.makerName }}</dd>
+          </div>
+          <div>
+            <dt>Execution date</dt>
+            <dd>{{ payment.executionDate ? (payment.executionDate | date: 'd MMM y') : '—' }}</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-pad">
+        <h2 class="section-title">Source account</h2>
+        <dl class="detail-grid">
+          <div>
+            <dt>Account</dt>
+            <dd class="font-mono">{{ debtorDisplay() }}</dd>
+          </div>
+          <div>
+            <dt>Currency</dt>
+            <dd>{{ payment.debtorAccount.currency ?? payment.currency }}</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-pad">
+        <h2 class="section-title">Beneficiary</h2>
+        <dl class="detail-grid">
+          <div>
+            <dt>Name</dt>
+            <dd>{{ payment.beneficiary.name }}</dd>
+          </div>
+          <div>
+            <dt>Account</dt>
+            <dd class="font-mono">{{ payment.beneficiary.account ?? '—' }}</dd>
+          </div>
+          @if (payment.beneficiary.bankCode) {
+            <div>
+              <dt>Bank code</dt>
+              <dd>{{ payment.beneficiary.bankCode }}</dd>
+            </div>
+          }
+          @if (payment.beneficiary.swift) {
+            <div>
+              <dt>SWIFT</dt>
+              <dd>{{ payment.beneficiary.swift }}</dd>
+            </div>
+          }
+          @if (payment.beneficiary.country) {
+            <div>
+              <dt>Country</dt>
+              <dd>{{ payment.beneficiary.country }}</dd>
+            </div>
+          }
+          @if (payment.beneficiary.address) {
+            <div>
+              <dt>Address</dt>
+              <dd>{{ payment.beneficiary.address }}</dd>
+            </div>
+          }
+        </dl>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-pad">
+        <h2 class="section-title">Payment information</h2>
+        <dl class="detail-grid">
+          <div>
+            <dt>Execution date</dt>
+            <dd>{{ payment.executionDate ? (payment.executionDate | date: 'd MMM y') : '—' }}</dd>
+          </div>
+          <div>
+            <dt>Purpose</dt>
+            <dd>{{ payment.purposeCode ?? '—' }}</dd>
+          </div>
+          @if (payment.chargeOption) {
+            <div>
+              <dt>Charge option</dt>
+              <dd>{{ payment.chargeOption }}</dd>
+            </div>
+          }
+          <div class="sm:col-span-2">
+            <dt>Remittance</dt>
+            <dd>{{ payment.remittanceInformation ?? '—' }}</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <div class="mb-4">
+      <app-payment-audit-timeline [events]="payment.audit" />
+    </div>
+
+    <app-payment-detail-actions
+      [paymentId]="payment.id"
+      [busy]="actionInProgress()"
+      [canEdit]="canEdit()"
+      [canSubmit]="canSubmit()"
+      [canCancel]="canCancel()"
+      [canDecide]="canDecide()"
+      [selfApprovalBlocked]="selfApprovalBlocked()"
+      (action)="onPaymentAction($event)"
+    />
+  }
+</div>
