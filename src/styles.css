@@ -1,0 +1,302 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --color-canvas: #eef1f4;
+  --color-surface: #ffffff;
+  --color-ink: #182433;
+  --color-muted: #5a6878;
+  --color-line: #d5dde6;
+  --color-accent: #1d4f91;
+  --color-accent-hover: #163e73;
+  --color-danger: #b42318;
+  /* Semantic status colors — single source of truth for state indicators. */
+  --color-state-draft: #475569;
+  --color-state-pending: #b45309;
+  --color-state-returned: #c2410c;
+  --color-state-approved: #047857;
+  --color-state-rejected: #b42318;
+  --color-state-cancelled: #94a3b8;
+  --radius-control: 0.5rem;
+  --radius-panel: 0.75rem;
+}
+
+@layer base {
+  body {
+    @apply bg-canvas font-sans text-ink antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-[var(--radius-control)] focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-accent;
+  }
+
+  .app-bar {
+    @apply border-b border-line bg-surface;
+  }
+
+  .app-bar-inner {
+    @apply mx-auto flex max-w-screen-2xl items-center gap-4 px-4 py-3 sm:px-6 lg:px-8;
+  }
+
+  .brand {
+    @apply shrink-0 text-sm font-semibold tracking-tight text-ink;
+  }
+
+  .app-nav {
+    @apply flex items-center gap-1;
+  }
+
+  .nav-link {
+    @apply rounded-[var(--radius-control)] px-3 py-2 text-sm font-medium text-muted transition-colors duration-150 hover:bg-canvas hover:text-ink;
+  }
+
+  .nav-link.is-active {
+    @apply bg-canvas text-ink;
+  }
+
+  .session-identity {
+    @apply ml-auto flex shrink-0 items-center gap-3;
+  }
+
+  .session-card {
+    @apply flex items-center gap-2.5 rounded-[var(--radius-control)] bg-canvas py-1.5 pl-1.5 pr-3 ring-1 ring-inset ring-line;
+  }
+
+  .session-avatar {
+    @apply flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-semibold tracking-wide text-white;
+  }
+
+  .session-info {
+    @apply min-w-0 text-left;
+  }
+
+  .session-name {
+    @apply truncate text-sm font-semibold leading-tight text-ink;
+  }
+
+  .session-meta {
+    @apply mt-0.5 flex items-center gap-1.5 text-xs leading-none text-muted;
+  }
+
+  .session-role {
+    @apply rounded-full bg-surface px-1.5 py-0.5 text-[0.6875rem] font-medium text-ink ring-1 ring-inset ring-line;
+  }
+
+  .session-switch {
+    @apply h-10 w-52 shrink-0 text-left text-sm;
+  }
+
+  .page {
+    @apply mx-auto max-w-screen-2xl px-4 py-6 sm:px-6 lg:px-8;
+  }
+
+  .page-narrow {
+    @apply mx-auto max-w-3xl px-4 py-6 sm:px-6;
+  }
+
+  .page-title {
+    @apply text-xl font-semibold tracking-tight text-ink sm:text-2xl;
+  }
+
+  .page-header {
+    @apply mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between;
+  }
+
+  .page-actions {
+    @apply flex flex-shrink-0 flex-wrap gap-2;
+  }
+
+  .page-lede {
+    @apply mt-1 max-w-prose text-sm text-muted;
+  }
+
+  .back-link {
+    @apply text-sm font-medium text-accent hover:text-accent-hover;
+  }
+
+  .panel {
+    @apply overflow-hidden rounded-[var(--radius-panel)] bg-surface shadow-sm ring-1 ring-line;
+  }
+
+  .panel-pad {
+    @apply p-5 sm:p-6;
+  }
+
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost {
+    @apply inline-flex h-10 min-w-10 items-center justify-center gap-2 rounded-[var(--radius-control)] px-4 text-sm font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply bg-accent text-white hover:bg-accent-hover;
+  }
+
+  .btn-secondary {
+    @apply bg-surface text-ink ring-1 ring-inset ring-line hover:bg-canvas;
+  }
+
+  .btn-ghost {
+    @apply text-muted hover:bg-canvas hover:text-ink;
+  }
+
+  .field-label {
+    @apply mb-1 block text-sm font-medium text-ink;
+  }
+
+  .field-label.is-required::after {
+    content: ' *';
+    color: var(--color-danger);
+  }
+
+  .field {
+    @apply block h-10 w-full rounded-[var(--radius-control)] border-0 bg-surface px-3 text-sm text-ink ring-1 ring-inset ring-line placeholder:text-muted focus:ring-2 focus:ring-inset focus:ring-accent;
+  }
+
+  select.field {
+    @apply appearance-none;
+    padding-right: 2.75rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%23182433' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+    background-position: right 0.85rem center;
+    background-repeat: no-repeat;
+    background-size: 1.1rem 1.1rem;
+  }
+
+  input[type='date'].field {
+    padding-right: 2.75rem;
+  }
+
+  .btn-danger {
+    @apply inline-flex h-10 min-w-10 items-center justify-center gap-2 rounded-[var(--radius-control)] bg-danger px-4 text-sm font-medium text-white transition-colors duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .section-title {
+    @apply text-base font-semibold text-ink;
+  }
+
+  .detail-grid {
+    @apply mt-4 grid gap-x-6 gap-y-5 sm:grid-cols-2;
+  }
+
+  .detail-grid dt {
+    @apply text-xs font-medium uppercase tracking-wide text-muted;
+  }
+
+  .detail-grid dd {
+    @apply mt-1.5 text-sm text-ink;
+  }
+
+  /* Status / state badge — paired with the statusBadge pipe token classes. */
+  .badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset;
+  }
+
+  /* Inline alerts for stale-state, action errors, and inline notices. */
+  .alert {
+    @apply rounded-[var(--radius-control)] px-4 py-3 text-sm;
+  }
+  .alert-warning {
+    @apply bg-amber-50 text-amber-800;
+  }
+  .alert-danger {
+    @apply bg-red-50 text-danger;
+  }
+  .alert-success {
+    @apply bg-emerald-50 text-emerald-800;
+  }
+
+  /* Form layout — consistent vertical rhythm and label/error pairing. */
+  .form-row {
+    @apply space-y-1;
+  }
+  .field-error {
+    @apply text-sm text-danger;
+  }
+  .field-hint {
+    @apply text-xs text-muted;
+  }
+
+  /* Segmented toggle — mutually exclusive option groups (e.g. All / Invalid only). */
+  .segmented {
+    @apply inline-flex rounded-[var(--radius-control)] bg-canvas p-1 ring-1 ring-inset ring-line;
+  }
+  .segmented-item {
+    @apply inline-flex h-8 items-center rounded-[calc(var(--radius-control)-0.25rem)] px-3 text-sm font-medium text-muted transition-colors;
+  }
+  .segmented-item.is-active {
+    @apply bg-surface text-ink shadow-sm;
+  }
+
+  /* Audit timeline — vertical rail with a marker per event. */
+  .timeline {
+    @apply mt-5 border-l border-line pl-6;
+  }
+  .timeline-item {
+    @apply relative space-y-1 pb-6 last:pb-0;
+  }
+  .timeline-item::before {
+    @apply absolute -left-6 -translate-x-1/2 top-1.5 h-2.5 w-2.5 rounded-full bg-line ring-4 ring-surface content-[''];
+  }
+  .timeline-item.is-active::before {
+    @apply bg-accent;
+  }
+
+  /* File drop — styled container for the bulk CSV input. */
+  .file-drop {
+    @apply flex flex-col items-center justify-center gap-2 rounded-[var(--radius-panel)] border-2 border-dashed border-line bg-canvas px-6 py-8 text-center transition-colors hover:border-accent/60;
+  }
+
+  /* Amount display — emphasis for the primary monetary value on a detail page. */
+  .amount-display {
+    @apply text-2xl font-semibold tracking-tight tabular-nums text-ink;
+  }
+
+  /* Step nav — progress indicator for the multi-step payment form. */
+  .step-nav {
+    @apply flex items-stretch gap-0;
+  }
+  .step-nav li {
+    @apply relative flex flex-1 items-center;
+  }
+  .step-nav li:not(:last-child)::after {
+    @apply ml-2 h-px flex-1 bg-line content-[''];
+  }
+  .step-nav li.is-done-connector::after {
+    @apply bg-accent/40;
+  }
+  .step-nav-item {
+    @apply inline-flex items-center gap-2 rounded-full py-1.5 pr-3 text-sm font-medium text-muted transition-colors disabled:cursor-not-allowed;
+  }
+  .step-nav-item.is-clickable {
+    @apply cursor-pointer hover:text-ink;
+  }
+  .step-nav-badge {
+    @apply flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-canvas text-xs font-semibold ring-1 ring-inset ring-line transition-colors;
+  }
+  .step-nav-item.is-current .step-nav-badge {
+    @apply bg-accent text-white ring-accent;
+  }
+  .step-nav-item.is-done .step-nav-badge {
+    @apply bg-accent/10 text-accent ring-accent/30;
+  }
+  .step-nav-item.is-current {
+    @apply text-ink;
+  }
+  .step-nav-item.is-done {
+    @apply text-ink;
+  }
+  .step-nav-label {
+    @apply hidden sm:inline;
+  }
+
+  .form-actions {
+    @apply mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line pt-6;
+  }
+}
