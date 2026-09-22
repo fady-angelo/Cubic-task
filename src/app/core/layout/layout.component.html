@@ -1,0 +1,40 @@
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<header class="app-bar">
+  <div class="app-bar-inner">
+    <a routerLink="/payments" class="brand">Cubic Payments</a>
+    <nav class="app-nav" aria-label="Primary">
+      <a routerLink="/payments" routerLinkActive="is-active" class="nav-link">Work queue</a>
+    </nav>
+    <div class="session-identity">
+      @if (session(); as current) {
+        <div class="session-card" aria-label="Signed-in user">
+          <span class="session-avatar" aria-hidden="true">{{ current.initials }}</span>
+          <div class="session-info">
+            <p class="session-name">{{ current.displayName }}</p>
+            <p class="session-meta">
+              <span class="session-role">{{ current.roleLabel }}</span>
+              <span>{{ current.branchCode }}</span>
+            </p>
+          </div>
+        </div>
+      }
+      <label class="sr-only" for="act-as-user">Act as user</label>
+      <select
+        id="act-as-user"
+        class="field session-switch"
+        [disabled]="sessionLoading()"
+        [value]="selectedUserId()"
+        (change)="switchUser($event)"
+      >
+        @for (option of switchUsers; track option.userId) {
+          <option [value]="option.userId">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+  </div>
+</header>
+
+<main id="main-content">
+  <router-outlet />
+</main>

@@ -1,0 +1,84 @@
+<div class="overflow-x-auto">
+  <table class="min-w-full divide-y divide-line" [attr.aria-busy]="loading()">
+    <thead class="bg-canvas">
+      <tr>
+        @for (col of headerColumns(); track col.key) {
+          <th
+            scope="col"
+            class="whitespace-nowrap px-4 py-2.5 text-left text-xs font-semibold text-muted"
+            [attr.aria-sort]="col.ariaSort"
+          >
+            @if (col.sortable) {
+              <button
+                type="button"
+                class="inline-flex items-center gap-1 rounded-sm hover:text-ink"
+                (click)="sort.emit(col.key)"
+              >
+                {{ col.label }}
+                <span class="inline-flex flex-col" aria-hidden="true">
+                  <svg
+                    class="h-2.5 w-2.5"
+                    [ngClass]="col.sortAscActive ? 'text-accent' : 'text-muted/40'"
+                    viewBox="0 0 16 16"
+                    fill="currentColor"
+                  >
+                    <path d="M8 4l4 6H4z" />
+                  </svg>
+                  <svg
+                    class="h-2.5 w-2.5"
+                    [ngClass]="col.sortDescActive ? 'text-accent' : 'text-muted/40'"
+                    viewBox="0 0 16 16"
+                    fill="currentColor"
+                  >
+                    <path d="M8 12L4 6h8z" />
+                  </svg>
+                </span>
+              </button>
+            } @else {
+              {{ col.label }}
+            }
+          </th>
+        }
+      </tr>
+    </thead>
+
+    <tbody class="divide-y divide-line bg-surface">
+      @if (loading()) {
+        @for (row of skeletonRows; track row) {
+          <tr aria-hidden="true">
+            @for (col of columns(); track col.key) {
+              <td class="px-4 py-3">
+                <div
+                  class="h-4 animate-pulse rounded bg-canvas"
+                  [style.width]="$first ? '80%' : '60%'"
+                ></div>
+              </td>
+            }
+          </tr>
+        }
+      } @else if (isEmpty()) {
+        <tr>
+          <td [colSpan]="columnCount()" class="px-6 py-16 text-center">
+            <ng-content select="[dataTableEmpty]" />
+          </td>
+        </tr>
+      } @else {
+        @for (row of rows(); track $index) {
+          <tr
+            class="hover:bg-canvas"
+            [class.cursor-pointer]="rowClickable()"
+            (click)="selectRow(row)"
+          >
+            <ng-container
+              [ngTemplateOutlet]="rowCells()"
+              [ngTemplateOutletContext]="{ $implicit: row }"
+            />
+          </tr>
+        }
+      }
+    </tbody>
+  </table>
+  @if (loading()) {
+    <span class="sr-only">{{ loadingLabel() }}</span>
+  }
+</div>

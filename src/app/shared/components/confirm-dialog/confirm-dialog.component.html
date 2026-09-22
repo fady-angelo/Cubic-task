@@ -1,0 +1,48 @@
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <button
+    type="button"
+    class="absolute inset-0 bg-ink/45"
+    aria-label="Stay on this page"
+    (click)="cancel.emit()"
+  ></button>
+  <div
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="confirm-dialog-title"
+    aria-describedby="confirm-dialog-message"
+    class="relative w-full max-w-md rounded-[var(--radius-panel)] bg-surface p-6 shadow-xl ring-1 ring-line"
+    (keydown.escape)="cancel.emit()"
+    tabindex="-1"
+  >
+    <div class="flex gap-4">
+      <div
+        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-danger/10 text-danger"
+        aria-hidden="true"
+      >
+        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path
+            fill-rule="evenodd"
+            d="M8.257 3.099c.765-1.36 2.721-1.36 3.486 0l6.518 11.59c.75 1.334-.213 2.986-1.743 2.986H3.482c-1.53 0-2.493-1.652-1.743-2.986zM10 7a.75.75 0 0 0-.75.75v3.5a.75.75 0 0 0 1.5 0v-3.5A.75.75 0 0 0 10 7m0 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2"
+            clip-rule="evenodd"
+          />
+        </svg>
+      </div>
+      <div class="min-w-0">
+        <h2 id="confirm-dialog-title" class="text-lg font-semibold tracking-tight text-ink">
+          {{ title() }}
+        </h2>
+        <p id="confirm-dialog-message" class="mt-2 text-sm leading-6 text-muted">
+          {{ message() }}
+        </p>
+      </div>
+    </div>
+    <div class="mt-6 flex flex-wrap justify-end gap-2">
+      <button type="button" class="btn-secondary" (click)="cancel.emit()">
+        {{ cancelLabel() }}
+      </button>
+      <button type="button" class="btn-danger" (click)="confirm.emit()">
+        {{ confirmLabel() }}
+      </button>
+    </div>
+  </div>
+</div>

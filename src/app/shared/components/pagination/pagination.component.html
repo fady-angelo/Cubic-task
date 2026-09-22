@@ -1,0 +1,68 @@
+<div
+  class="flex flex-col gap-3 border-t border-line bg-surface px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5"
+>
+  <p class="text-sm text-muted">
+    Showing
+    <span class="font-medium tabular-nums text-ink">{{ rangeStart() }}</span>
+    –
+    <span class="font-medium tabular-nums text-ink">{{ rangeEnd() }}</span>
+    of
+    <span class="font-medium tabular-nums text-ink">{{ total() | number }}</span>
+    {{ itemLabel() }}
+  </p>
+
+  <nav class="flex flex-wrap items-center gap-1" aria-label="Pagination">
+    <button
+      (click)="goToPage.emit(previousPage())"
+      [disabled]="isFirstPage()"
+      type="button"
+      class="btn-secondary h-10 w-10 px-0"
+      aria-label="Previous page"
+    >
+      <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path
+          fill-rule="evenodd"
+          d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </button>
+
+    @for (p of pageItems(); track $index) {
+      @if (p === 'ellipsis') {
+        <span class="inline-flex h-10 w-8 items-center justify-center text-sm text-muted">…</span>
+      } @else {
+        <button
+          (click)="goToPage.emit(p)"
+          type="button"
+          [attr.aria-current]="p === currentPage() ? 'page' : null"
+          [attr.aria-label]="'Page ' + p"
+          class="h-10 min-w-10 rounded-[var(--radius-control)] px-2 text-sm font-medium"
+          [ngClass]="
+            p === currentPage()
+              ? 'bg-accent text-white'
+              : 'text-muted ring-1 ring-line hover:bg-canvas'
+          "
+        >
+          {{ p }}
+        </button>
+      }
+    }
+
+    <button
+      (click)="goToPage.emit(nextPage())"
+      [disabled]="isLastPage()"
+      type="button"
+      class="btn-secondary h-10 w-10 px-0"
+      aria-label="Next page"
+    >
+      <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path
+          fill-rule="evenodd"
+          d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </button>
+  </nav>
+</div>
