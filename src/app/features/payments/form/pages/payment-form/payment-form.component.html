@@ -1,0 +1,152 @@
+<div class="page-narrow space-y-6">
+  <a routerLink="/payments" class="back-link">Back to queue</a>
+
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">{{ heading() }}</h1>
+      <p class="page-lede">Complete the four steps to save a draft or submit for checking.</p>
+    </div>
+  </header>
+
+  @if (paymentError(); as message) {
+    <app-error-state [message]="message" (retry)="paymentResource.reload()" />
+  } @else if (paymentLoading() && !payment()) {
+    <p class="page-lede">Loading payment…</p>
+  } @else if (editBlocked()) {
+    <p class="page-lede" role="alert">Only draft or returned payments can be edited.</p>
+    <a [routerLink]="['/payments', payment()?.id]" class="back-link">View payment</a>
+  } @else {
+    <nav aria-label="Payment form steps">
+      <ol class="step-nav">
+        @for (step of stepStates(); track step.id) {
+          <li>
+            <button
+              type="button"
+              class="step-nav-item"
+              [class.is-current]="step.isCurrent"
+              [class.is-done]="step.isDone"
+              [class.is-clickable]="step.isClickable"
+              [disabled]="!step.isClickable"
+              [attr.aria-current]="step.isCurrent ? 'step' : null"
+              (click)="goToStep(step.id)"
+            >
+              @if (step.isDone) {
+                <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path
+                    fill-rule="evenodd"
+                    d="M16.704 5.29a1 1 0 010 1.42l-7.5 7.5a1 1 0 01-1.42 0l-3.5-3.5a1 1 0 111.42-1.42l2.79 2.79 6.79-6.79a1 1 0 011.42 0z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              }
+              <span>{{ step.id }}. {{ step.label }}</span>
+            </button>
+          </li>
+        }
+      </ol>
+    </nav>
+
+    <form class="panel" [formGroup]="form" (ngSubmit)="$event.preventDefault()">
+      <div class="panel-pad space-y-5">
+        <div class="space-y-1">
+          <h2 class="section-title">Step {{ currentStep() }}. {{ currentStepLabel() }}</h2>
+          <p class="text-sm text-muted">{{ stepDescription(currentStep()) }}</p>
+        </div>
+
+        @switch (currentStep()) {
+          @case (1) {
+            <app-payment-source-step
+              [sourceForm]="form.controls.source"
+              [accounts]="debitAccounts()"
+              [paymentTypes]="referenceResourceValue()?.paymentTypes ?? []"
+              [minExecutionDate]="minExecutionDate"
+              [loading]="accountsLoading()"
+              [errorMessage]="accountsError()"
+              (retry)="accountsResource.reload()"
+            />
+          }
+          @case (2) {
+            <app-payment-beneficiary-step
+              [beneficiaryForm]="form.controls.beneficiary"
+              [beneficiaries]="beneficiaries()"
+              [paymentType]="paymentType()"
+              [loading]="beneficiariesLoading()"
+              [errorMessage]="beneficiariesError()"
+              (retry)="beneficiariesResource.reload()"
+            />
+          }
+          @case (3) {
+            <app-payment-payment-step
+              [paymentForm]="form.controls.payment"
+              [currencies]="referenceResourceValue()?.currencies ?? []"
+              [purposeCodes]="referenceResourceValue()?.purposeCodes ?? []"
+              [chargeOptions]="referenceResourceValue()?.chargeOptions ?? []"
+              [paymentType]="paymentType()"
+            />
+          }
+          @case (4) {
+            <app-payment-review-step
+              [summary]="reviewSummary()"
+              [formValid]="isFormValid()"
+              [requiresFxQuote]="requiresFxQuote()"
+              [quote]="quote()"
+              [quoteLoading]="quoteLoading()"
+              [quoteError]="quoteError()"
+              [quoteExpired]="quoteExpired()"
+              [remainingSeconds]="remainingSeconds()"
+              (retryQuote)="retryQuote()"
+            />
+          }
+        }
+
+        @if (staleNotice()) {
+          <p class="alert alert-warning" role="alert">
+            This payment was updated elsewhere. Reload completed; try again.
+          </p>
+        }
+        @if (actionError(); as message) {
+          <p class="alert alert-danger" role="alert">{{ message }}</p>
+        }
+
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" [disabled]="!canGoBack()" (click)="goBack()">
+            Back
+          </button>
+          <div class="flex flex-wrap gap-2">
+            @if (canGoNext()) {
+              <button type="button" class="btn-primary" (click)="goNext()">Next</button>
+            } @else {
+              <button
+                type="button"
+                class="btn-secondary"
+                [disabled]="!canSaveDraft()"
+                (click)="saveDraft()"
+              >
+                Save draft
+              </button>
+              <button
+                type="button"
+                class="btn-primary"
+                [disabled]="!canSubmit()"
+                (click)="submitPayment()"
+              >
+                Submit
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    </form>
+  }
+</div>
+
+@if (unsavedTracker.leavePromptOpen()) {
+  <app-confirm-dialog
+    title="Leave without saving?"
+    message="This payment has unsaved changes. If you leave now, those details will be lost."
+    confirmLabel="Leave without saving"
+    cancelLabel="Stay on this page"
+    (confirm)="unsavedTracker.leaveWithoutSaving()"
+    (cancel)="unsavedTracker.stayOnPage()"
+  />
+}

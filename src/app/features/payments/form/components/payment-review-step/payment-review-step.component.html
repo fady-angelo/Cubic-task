@@ -1,0 +1,79 @@
+<div class="space-y-4">
+  <dl class="detail-grid">
+    <div>
+      <dt>Debit account</dt>
+      <dd>{{ summary().debitAccount }}</dd>
+    </div>
+    <div>
+      <dt>Type</dt>
+      <dd>{{ summary().type }}</dd>
+    </div>
+    <div>
+      <dt>Execution date</dt>
+      <dd>{{ summary().executionDate }}</dd>
+    </div>
+    <div>
+      <dt>Beneficiary</dt>
+      <dd>{{ summary().beneficiary }}</dd>
+    </div>
+    <div>
+      <dt>Amount</dt>
+      <dd>{{ summary().amount }}</dd>
+    </div>
+  </dl>
+
+  @if (formValid()) {
+    <p class="alert alert-success" role="status">Ready to confirm.</p>
+  } @else {
+    <p class="alert alert-danger" role="alert">Fix the required fields before confirming.</p>
+  }
+
+  @if (requiresFxQuote()) {
+    <div class="rounded-[var(--radius-control)] bg-canvas p-4 ring-1 ring-inset ring-line">
+      <h3 class="text-sm font-semibold text-ink">FX quote</h3>
+      @if (quoteLoading()) {
+        <p class="mt-2 text-sm text-muted">Loading FX quote…</p>
+      } @else if (quoteError(); as message) {
+        <p class="field-error mt-2" role="alert">{{ message }}</p>
+        <button type="button" class="btn-secondary mt-3" (click)="retryQuote.emit()">
+          Retry quote
+        </button>
+      } @else if (quote(); as quote) {
+        <dl class="detail-grid mt-3">
+          <div>
+            <dt>Quote ID</dt>
+            <dd class="font-mono">{{ quote.quoteId }}</dd>
+          </div>
+          <div>
+            <dt>Rate</dt>
+            <dd>{{ quote.rate }}</dd>
+          </div>
+          <div>
+            <dt>Debit amount</dt>
+            <dd>{{ quote.debitAmount }} {{ quote.sourceCurrency }}</dd>
+          </div>
+          <div>
+            <dt>Target amount</dt>
+            <dd>{{ quote.targetAmount }} {{ quote.targetCurrency }}</dd>
+          </div>
+          <div>
+            <dt>Expiry</dt>
+            <dd>
+              @if (quoteExpired()) {
+                Expired
+              } @else {
+                {{ remainingSeconds() }}s remaining
+              }
+            </dd>
+          </div>
+        </dl>
+        @if (quoteExpired()) {
+          <p class="field-error mt-3" role="alert">This FX quote has expired.</p>
+          <button type="button" class="btn-secondary mt-3" (click)="retryQuote.emit()">
+            Request new quote
+          </button>
+        }
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,53 @@
+<div [formGroup]="sourceForm()" class="space-y-4">
+  @if (errorMessage(); as message) {
+    <app-error-state [message]="message" (retry)="retry.emit()" />
+  } @else if (loading() && accounts().length === 0) {
+    <p class="page-lede">Loading accounts…</p>
+  } @else {
+    <div>
+      <label class="field-label is-required" for="debit-account">Debit account</label>
+      <select id="debit-account" class="field" formControlName="debitAccountId">
+        <option value="">Select an account</option>
+        @for (account of accounts(); track account.id) {
+          <option [value]="account.id">{{ account.label }}</option>
+        }
+      </select>
+      @if (
+        sourceForm().controls.debitAccountId.invalid && sourceForm().controls.debitAccountId.touched
+      ) {
+        <p class="mt-1 text-sm text-danger">Select a debit account.</p>
+      }
+    </div>
+  }
+
+  <div>
+    <label class="field-label is-required" for="payment-type">Payment type</label>
+    <select id="payment-type" class="field" formControlName="type">
+      <option value="">Select a type</option>
+      @for (type of paymentTypes(); track type.value) {
+        <option [value]="type.value">{{ type.label }}</option>
+      }
+    </select>
+    @if (sourceForm().controls.type.invalid && sourceForm().controls.type.touched) {
+      <p class="mt-1 text-sm text-danger">Select a payment type.</p>
+    }
+  </div>
+
+  <div>
+    <label class="field-label is-required" for="execution-date">Execution date</label>
+    <input
+      id="execution-date"
+      class="field"
+      type="date"
+      formControlName="executionDate"
+      [attr.min]="minExecutionDate()"
+    />
+    @if (sourceForm().controls.executionDate.touched) {
+      @if (sourceForm().controls.executionDate.hasError('required')) {
+        <p class="mt-1 text-sm text-danger">Enter an execution date.</p>
+      } @else if (sourceForm().controls.executionDate.hasError('pastDate')) {
+        <p class="mt-1 text-sm text-danger">Execution date cannot be in the past.</p>
+      }
+    }
+  </div>
+</div>

@@ -1,0 +1,87 @@
+<div [formGroup]="beneficiaryForm()" class="space-y-4">
+  <fieldset>
+    <legend class="field-label">Beneficiary</legend>
+    <div class="mt-2 flex flex-wrap gap-4">
+      <label class="flex items-center gap-2 text-sm">
+        <input type="radio" formControlName="mode" value="existing" />
+        Existing
+      </label>
+      <label class="flex items-center gap-2 text-sm">
+        <input type="radio" formControlName="mode" value="new" (change)="onModeChange()" />
+        New
+      </label>
+    </div>
+  </fieldset>
+
+  @if (errorMessage(); as message) {
+    <app-error-state [message]="message" (retry)="retry.emit()" />
+  } @else if (loading() && beneficiaries().length === 0) {
+    <p class="page-lede">Loading beneficiaries…</p>
+  } @else if (beneficiaryForm().controls.mode.value === 'existing') {
+    <div>
+      <label class="field-label" for="existing-beneficiary">Saved beneficiary</label>
+      <select
+        id="existing-beneficiary"
+        class="field"
+        formControlName="existingId"
+        (change)="applyExisting($event)"
+      >
+        <option value="">Select a beneficiary</option>
+        @for (beneficiary of beneficiaries(); track beneficiary.id) {
+          <option [value]="beneficiary.id">{{ beneficiary.name }}</option>
+        }
+      </select>
+    </div>
+  }
+
+  <div>
+    <label class="field-label is-required" for="beneficiary-name">Name</label>
+    <input id="beneficiary-name" class="field" type="text" formControlName="name" />
+    @if (beneficiaryForm().controls.name.invalid && beneficiaryForm().controls.name.touched) {
+      <p class="mt-1 text-sm text-danger">Enter a beneficiary name.</p>
+    }
+  </div>
+
+  <div>
+    <label class="field-label is-required" for="beneficiary-account">Account</label>
+    <input id="beneficiary-account" class="field" type="text" formControlName="account" />
+    @if (beneficiaryForm().controls.account.invalid && beneficiaryForm().controls.account.touched) {
+      <p class="mt-1 text-sm text-danger">Enter a beneficiary account.</p>
+    }
+  </div>
+
+  @if (isDomestic()) {
+    <div>
+      <label class="field-label" for="beneficiary-bank-code">Bank code</label>
+      <input id="beneficiary-bank-code" class="field" type="text" formControlName="bankCode" />
+    </div>
+  }
+
+  @if (isInternational()) {
+    <div>
+      <label class="field-label is-required" for="beneficiary-swift">SWIFT/BIC</label>
+      <input id="beneficiary-swift" class="field" type="text" formControlName="swift" />
+      @if (beneficiaryForm().controls.swift.invalid && beneficiaryForm().controls.swift.touched) {
+        <p class="mt-1 text-sm text-danger">Enter a SWIFT/BIC code.</p>
+      }
+    </div>
+    <div>
+      <label class="field-label is-required" for="beneficiary-country">Country</label>
+      <input id="beneficiary-country" class="field" type="text" formControlName="country" />
+      @if (
+        beneficiaryForm().controls.country.invalid && beneficiaryForm().controls.country.touched
+      ) {
+        <p class="mt-1 text-sm text-danger">Enter a country.</p>
+      }
+    </div>
+    <div>
+      <label class="field-label is-required" for="beneficiary-address">Address</label>
+      <input id="beneficiary-address" class="field" type="text" formControlName="address" />
+      @if (
+        beneficiaryForm().controls.address.invalid && beneficiaryForm().controls.address.touched
+      ) {
+        <p class="mt-1 text-sm text-danger">Enter a beneficiary address.</p>
+      }
+    </div>
+  }
+</div>

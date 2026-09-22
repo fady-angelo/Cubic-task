@@ -1,0 +1,83 @@
+<div [formGroup]="paymentForm()" class="space-y-4">
+  <div>
+    <label class="field-label is-required" for="payment-amount">Amount</label>
+    <input
+      id="payment-amount"
+      class="field"
+      type="number"
+      formControlName="amount"
+      min="0"
+      step="any"
+    />
+    @if (paymentForm().controls.amount.touched) {
+      @if (paymentForm().controls.amount.hasError('required')) {
+        <p class="mt-1 text-sm text-danger">Enter an amount.</p>
+      } @else if (paymentForm().controls.amount.hasError('notPositive')) {
+        <p class="mt-1 text-sm text-danger">Amount must be greater than 0.</p>
+      } @else if (paymentForm().controls.amount.hasError('currencyPrecision')) {
+        <p class="mt-1 text-sm text-danger">
+          Amount has too many decimal places for this currency.
+        </p>
+      }
+    }
+  </div>
+
+  <div>
+    <label class="field-label is-required" for="payment-currency">Currency</label>
+    <select id="payment-currency" class="field" formControlName="currency">
+      <option value="">Select a currency</option>
+      @for (currency of currencies(); track currency.code) {
+        <option [value]="currency.code">{{ currency.code }}</option>
+      }
+    </select>
+    @if (paymentForm().controls.currency.invalid && paymentForm().controls.currency.touched) {
+      <p class="mt-1 text-sm text-danger">Select a currency.</p>
+    }
+  </div>
+
+  <div>
+    <label class="field-label is-required" for="payment-purpose">Purpose</label>
+    <select id="payment-purpose" class="field" formControlName="purposeCode">
+      <option value="">Select a purpose</option>
+      @for (code of purposeCodes(); track code) {
+        <option [value]="code">{{ code }}</option>
+      }
+    </select>
+    @if (paymentForm().controls.purposeCode.invalid && paymentForm().controls.purposeCode.touched) {
+      <p class="mt-1 text-sm text-danger">Select a purpose code.</p>
+    }
+  </div>
+
+  <div>
+    <label class="field-label is-required" for="payment-remittance">Remittance</label>
+    <textarea
+      id="payment-remittance"
+      class="field min-h-24 py-2"
+      rows="3"
+      formControlName="remittanceInformation"
+    ></textarea>
+    @if (
+      paymentForm().controls.remittanceInformation.invalid &&
+      paymentForm().controls.remittanceInformation.touched
+    ) {
+      <p class="mt-1 text-sm text-danger">Enter remittance information.</p>
+    }
+  </div>
+
+  @if (isInternational()) {
+    <div>
+      <label class="field-label is-required" for="payment-charge">Charge option</label>
+      <select id="payment-charge" class="field" formControlName="chargeOption">
+        <option value="">Select a charge option</option>
+        @for (option of chargeOptions(); track option) {
+          <option [value]="option">{{ option }}</option>
+        }
+      </select>
+      @if (
+        paymentForm().controls.chargeOption.invalid && paymentForm().controls.chargeOption.touched
+      ) {
+        <p class="mt-1 text-sm text-danger">Select a charge option.</p>
+      }
+    </div>
+  }
+</div>
