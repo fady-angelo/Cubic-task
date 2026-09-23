@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, effect, input, output } from '@angular/core';
-import { AbstractControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
 import { ErrorStateComponent } from '../../../../../shared/components/error-state/error-state.component';
 import { Beneficiary } from '../../../models/beneficiary.models';
 import { PaymentType } from '../../../shared/enums/payment.enums';
@@ -21,14 +21,6 @@ export class PaymentBeneficiaryStepComponent {
 
   readonly isDomestic = computed(() => this.paymentType() === PaymentType.Domestic);
   readonly isInternational = computed(() => this.paymentType() === PaymentType.International);
-
-  private readonly applyPaymentTypeRules = effect(() => {
-    this.syncBeneficiaryTypeRules(
-      this.beneficiaryForm(),
-      this.isDomestic(),
-      this.isInternational(),
-    );
-  });
 
   applyExisting(event: Event): void {
     const select = event.target;
@@ -62,38 +54,5 @@ export class PaymentBeneficiaryStepComponent {
       country: '',
       address: '',
     });
-  }
-
-  private syncBeneficiaryTypeRules(
-    group: PaymentBeneficiaryFormGroup,
-    isDomestic: boolean,
-    isInternational: boolean,
-  ): void {
-    setRequired(group.controls.name, isDomestic || isInternational);
-    setRequired(group.controls.account, isDomestic || isInternational);
-    setRequired(group.controls.swift, isInternational);
-    setRequired(group.controls.country, isInternational);
-    setRequired(group.controls.address, isInternational);
-    setEnabled(group.controls.bankCode, isDomestic);
-    setEnabled(group.controls.swift, isInternational);
-    setEnabled(group.controls.country, isInternational);
-    setEnabled(group.controls.address, isInternational);
-  }
-}
-
-function setRequired(control: AbstractControl, required: boolean): void {
-  if (required) {
-    control.setValidators(Validators.required);
-  } else {
-    control.clearValidators();
-  }
-  control.updateValueAndValidity({ emitEvent: false });
-}
-
-function setEnabled(control: AbstractControl, enabled: boolean): void {
-  if (enabled) {
-    control.enable({ emitEvent: false });
-  } else {
-    control.disable({ emitEvent: false });
   }
 }

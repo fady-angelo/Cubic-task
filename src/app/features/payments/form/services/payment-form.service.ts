@@ -1,6 +1,6 @@
 import { DestroyRef, Injectable, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, Validators } from '@angular/forms';
 import { PaymentDetail } from '../../models/payment-detail.models';
 import { PaymentType } from '../../shared/enums/payment.enums';
 import { BeneficiaryMode, PaymentForm } from '../models/payment-form.models';
@@ -56,26 +56,38 @@ export class PaymentFormService {
         minorUnitsFor(form.controls.payment.controls.currency.value),
       ),
     ]);
-    this.bindPaymentTypeCleanup(form, destroyRef);
-    this.syncChargeOption(form, form.controls.source.controls.type.value);
+    this.bindTypeRules(form, destroyRef);
+    this.bindCurrencyPrecision(form, destroyRef);
+    this.applyTypeRules(form, form.controls.source.controls.type.value);
     return form;
   }
 
   applyDetail(form: PaymentForm, payment: PaymentDetail): void {
     const value = toPaymentFormValue(payment);
-    this.syncChargeOption(form, value.source.type);
+    this.applyTypeRules(form, value.source.type);
     form.patchValue(value);
     form.updateValueAndValidity();
     form.markAsPristine();
   }
 
-  private bindPaymentTypeCleanup(form: PaymentForm, destroyRef: DestroyRef): void {
+  private bindTypeRules(form: PaymentForm, destroyRef: DestroyRef): void {
     form.controls.source.controls.type.valueChanges
       .pipe(takeUntilDestroyed(destroyRef))
-      .subscribe((type) => {
-        this.clearInapplicableFields(form, type);
-        this.syncChargeOption(form, type);
+      .subscribe((type) => this.applyTypeRules(form, type));
+  }
+
+  private bindCurrencyPrecision(form: PaymentForm, destroyRef: DestroyRef): void {
+    form.controls.payment.controls.currency.valueChanges
+      .pipe(takeUntilDestroyed(destroyRef))
+      .subscribe(() => {
+        form.controls.payment.controls.amount.updateValueAndValidity();
       });
+  }
+
+  private applyTypeRules(form: PaymentForm, type: PaymentType | ''): void {
+    this.clearInapplicableFields(form, type);
+    this.syncChargeOption(form, type);
+    this.syncBeneficiaryFields(form, type);
   }
 
   private syncChargeOption(form: PaymentForm, type: PaymentType | ''): void {
@@ -90,17 +102,51 @@ export class PaymentFormService {
     charge.updateValueAndValidity({ emitEvent: false });
   }
 
+  private syncBeneficiaryFields(form: PaymentForm, type: PaymentType | ''): void {
+    const beneficiary = form.controls.beneficiary.controls;
+    const isDomestic = type === PaymentType.Domestic;
+    const isInternational = type === PaymentType.International;
+
+    const hasType = isDomestic || isInternational;
+    setRequired(beneficiary.name, hasType);
+    setRequired(beneficiary.account, hasType);
+    setEnabled(beneficiary.bankCode, isDomestic);
+    setEnabled(beneficiary.swift, isInternational);
+    setEnabled(beneficiary.country, isInternational);
+    setEnabled(beneficiary.address, isInternational);
+    setRequired(beneficiary.swift, isInternational);
+    setRequired(beneficiary.country, isInternational);
+    setRequired(beneficiary.address, isInternational);
+  }
+
   private clearInapplicableFields(form: PaymentForm, type: PaymentType | ''): void {
     const beneficiary = form.controls.beneficiary.controls;
     if (type === PaymentType.Domestic) {
-      beneficiary.swift.setValue('');
-      beneficiary.country.setValue('');
-      beneficiary.address.setValue('');
-      form.controls.payment.controls.chargeOption.setValue('');
+      beneficiary.swift.setValue('', { emitEvent: false });
+      beneficiary.country.setValue('', { emitEvent: false });
+      beneficiary.address.setValue('', { emitEvent: false });
+      form.controls.payment.controls.chargeOption.setValue('', { emitEvent: false });
       return;
     }
     if (type === PaymentType.International) {
-      beneficiary.bankCode.setValue('');
+      beneficiary.bankCode.setValue('', { emitEvent: false });
     }
+  }
+}
+
+function setRequired(control: AbstractControl, required: boolean): void {
+  if (required) {
+    control.setValidators(Validators.required);
+  } else {
+    control.clearValidators();
+  }
+  control.updateValueAndValidity({ emitEvent: false });
+}
+
+function setEnabled(control: AbstractControl, enabled: boolean): void {
+  if (enabled) {
+    control.enable({ emitEvent: false });
+  } else {
+    control.disable({ emitEvent: false });
   }
 }

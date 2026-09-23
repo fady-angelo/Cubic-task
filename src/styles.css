@@ -170,7 +170,23 @@
   }
 
   input[type='date'].field {
+    position: relative;
     padding-right: 2.75rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%23182433' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6' d='M6.5 3.5v2M13.5 3.5v2M4.5 7h11M5 5h10a1 1 0 011 1v9a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1z'/%3E%3C/svg%3E");
+    background-position: right 0.85rem center;
+    background-repeat: no-repeat;
+    background-size: 1.1rem 1.1rem;
+  }
+
+  input[type='date'].field::-webkit-calendar-picker-indicator {
+    position: absolute;
+    right: 0;
+    width: 2.75rem;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    opacity: 0;
   }
 
   .btn-danger {
