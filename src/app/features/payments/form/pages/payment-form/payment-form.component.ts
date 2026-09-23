@@ -33,6 +33,10 @@ import { PaymentWriteResult } from '../../../models/payment-command.models';
 import { PaymentDetail } from '../../../models/payment-detail.models';
 import { toDebitAccountOptions } from '../../utils/to-debit-account-options';
 import { toPaymentReviewSummary } from '../../utils/to-payment-review-summary';
+import {
+  isPaymentFormStepValid,
+  paymentFormGroupForStep,
+} from '../../utils/payment-form-step-group';
 import { toPaymentWriteRequest } from '../../utils/to-payment-write-request';
 import { applyPaymentFieldErrors } from '../../utils/apply-payment-field-errors';
 import { quoteRequestKey } from '../../services/payment-fx-quote.service';
@@ -115,6 +119,7 @@ export class PaymentFormComponent implements OnInit {
       this.form,
       this.debitAccounts(),
       this.referenceResourceValue()?.paymentTypes,
+      canViewFullAccount(this.sessionQuery.user()),
     );
   });
   readonly steps = PAYMENT_FORM_STEPS;
@@ -134,7 +139,12 @@ export class PaymentFormComponent implements OnInit {
     return matchingStep?.label;
   });
   readonly canGoBack = computed(() => this.currentStep() > FIRST_PAYMENT_FORM_STEP);
-  readonly canGoNext = computed(() => this.currentStep() < LAST_PAYMENT_FORM_STEP);
+  readonly isLastStep = computed(() => this.currentStep() === LAST_PAYMENT_FORM_STEP);
+  readonly canAdvance = computed(() => {
+    this.formStatus();
+    this.formValue();
+    return !this.isLastStep() && isPaymentFormStepValid(this.form, this.currentStep());
+  });
   readonly fxQuoteRequest = computed((): FxQuoteRequest | null => this.toFxQuoteRequest());
   readonly requiresFxQuote = computed(() => {
     const request = this.fxQuoteRequest();
@@ -217,7 +227,12 @@ export class PaymentFormComponent implements OnInit {
   }
 
   goNext(): void {
-    if (!this.canGoNext()) {
+    if (this.isLastStep()) {
+      return;
+    }
+    const group = paymentFormGroupForStep(this.form, this.currentStep());
+    if (!group?.valid) {
+      group?.markAllAsTouched();
       return;
     }
     this.currentStep.update((step) => (step + 1) as PaymentFormStepId);

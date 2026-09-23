@@ -29,9 +29,17 @@ class PaymentReviewStepHost {
   readonly summary = signal<PaymentReviewSummary>({
     debitAccount: '**** **** **** 4412 · GBP',
     beneficiary: 'Acme Supplies Ltd',
+    beneficiaryAccount: '**** 4412',
     amount: 'GBP 10.12',
     type: 'Domestic',
     executionDate: '2026-09-25',
+    purposeCode: 'SUPP',
+    remittanceInformation: 'Invoice 12',
+    bankCode: 'NWBK',
+    swift: '',
+    country: '',
+    address: '',
+    chargeOption: '',
   });
 }
 
@@ -50,9 +58,13 @@ describe('PaymentReviewStepComponent', () => {
     const text = fixture.nativeElement.textContent as string;
     expect(text).toContain('**** **** **** 4412 · GBP');
     expect(text).toContain('Acme Supplies Ltd');
+    expect(text).toContain('**** 4412');
     expect(text).toContain('GBP 10.12');
     expect(text).toContain('Domestic');
     expect(text).toContain('2026-09-25');
+    expect(text).toContain('SUPP');
+    expect(text).toContain('Invoice 12');
+    expect(text).toContain('NWBK');
     expect(text).not.toContain('GB29CUBI0000000004412');
   });
 

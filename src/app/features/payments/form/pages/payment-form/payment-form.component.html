@@ -113,8 +113,15 @@
             Back
           </button>
           <div class="flex flex-wrap gap-2">
-            @if (canGoNext()) {
-              <button type="button" class="btn-primary" (click)="goNext()">Next</button>
+            @if (!isLastStep()) {
+              <button
+                type="button"
+                class="btn-primary"
+                [disabled]="!canAdvance()"
+                (click)="goNext()"
+              >
+                Next
+              </button>
             } @else {
               <button
                 type="button"

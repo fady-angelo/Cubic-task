@@ -16,10 +16,54 @@
       <dt>Beneficiary</dt>
       <dd>{{ summary().beneficiary }}</dd>
     </div>
+    @if (summary().beneficiaryAccount) {
+      <div>
+        <dt>Beneficiary account</dt>
+        <dd>{{ summary().beneficiaryAccount }}</dd>
+      </div>
+    }
+    @if (summary().bankCode) {
+      <div>
+        <dt>Bank code</dt>
+        <dd>{{ summary().bankCode }}</dd>
+      </div>
+    }
+    @if (summary().swift) {
+      <div>
+        <dt>SWIFT</dt>
+        <dd>{{ summary().swift }}</dd>
+      </div>
+    }
+    @if (summary().country) {
+      <div>
+        <dt>Country</dt>
+        <dd>{{ summary().country }}</dd>
+      </div>
+    }
+    @if (summary().address) {
+      <div>
+        <dt>Address</dt>
+        <dd>{{ summary().address }}</dd>
+      </div>
+    }
     <div>
       <dt>Amount</dt>
       <dd>{{ summary().amount }}</dd>
     </div>
+    <div>
+      <dt>Purpose</dt>
+      <dd>{{ summary().purposeCode }}</dd>
+    </div>
+    <div>
+      <dt>Remittance</dt>
+      <dd>{{ summary().remittanceInformation }}</dd>
+    </div>
+    @if (summary().chargeOption) {
+      <div>
+        <dt>Charge</dt>
+        <dd>{{ summary().chargeOption }}</dd>
+      </div>
+    }
   </dl>
 
   @if (formValid()) {

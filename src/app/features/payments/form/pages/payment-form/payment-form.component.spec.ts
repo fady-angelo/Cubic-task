@@ -177,12 +177,36 @@ describe('PaymentFormComponent', () => {
     expect(fixture.componentInstance.form.controls.source.controls.debitAccountId.value).toBe('');
   });
 
+  it('does not advance until the current step group is valid', async () => {
+    await setup();
+
+    const next = findButton(fixture, 'Next');
+    expect(fixture.componentInstance.canAdvance()).toBe(false);
+    expect(next.disabled).toBe(true);
+    fixture.componentInstance.goNext();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.currentStep()).toBe(1);
+    expect(fixture.componentInstance.form.controls.source.controls.debitAccountId.touched).toBe(
+      true,
+    );
+
+    fillValidSource(fixture.componentInstance);
+    TestBed.inject(ApplicationRef).tick();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.canAdvance()).toBe(true);
+    expect(findButton(fixture, 'Next').disabled).toBe(false);
+    findButton(fixture, 'Next').click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.currentStep()).toBe(2);
+  });
+
   it('moves Next and Back without submitting', async () => {
     await setup();
     const form = fixture.nativeElement.querySelector('form') as HTMLFormElement;
     const submit = vi.fn();
     form.addEventListener('submit', submit);
 
+    fillValidSource(fixture.componentInstance);
     fixture.componentInstance.goNext();
     fixture.detectChanges();
     expect(fixture.componentInstance.currentStep()).toBe(2);
@@ -201,6 +225,7 @@ describe('PaymentFormComponent', () => {
 
   it('fills name and account when an existing beneficiary is selected', async () => {
     await setup();
+    fillValidSource(fixture.componentInstance);
     fixture.componentInstance.goNext();
     fixture.detectChanges();
 
@@ -218,7 +243,7 @@ describe('PaymentFormComponent', () => {
 
   it('requires domestic beneficiary name and account and does not require SWIFT', async () => {
     await setup();
-    fixture.componentInstance.form.controls.source.controls.type.setValue(PaymentType.Domestic);
+    fillValidSource(fixture.componentInstance, PaymentType.Domestic);
     fixture.componentInstance.goNext();
     fixture.detectChanges();
 
@@ -237,9 +262,7 @@ describe('PaymentFormComponent', () => {
 
   it('requires SWIFT, country, and address for an international payment', async () => {
     await setup();
-    fixture.componentInstance.form.controls.source.controls.type.setValue(
-      PaymentType.International,
-    );
+    fillValidSource(fixture.componentInstance, PaymentType.International);
     fixture.componentInstance.goNext();
     fixture.detectChanges();
 
@@ -260,7 +283,7 @@ describe('PaymentFormComponent', () => {
   it('clears SWIFT, country, address, and charge when switching back to Domestic', async () => {
     await setup();
     const form = fixture.componentInstance.form;
-    form.controls.source.controls.type.setValue(PaymentType.International);
+    fillValidSource(fixture.componentInstance, PaymentType.International);
     fixture.componentInstance.goNext();
     fixture.detectChanges();
 
@@ -282,6 +305,7 @@ describe('PaymentFormComponent', () => {
 
   it('clears name and account when switching to a new beneficiary', async () => {
     await setup();
+    fillValidSource(fixture.componentInstance);
     fixture.componentInstance.goNext();
     fixture.detectChanges();
 
@@ -308,6 +332,8 @@ describe('PaymentFormComponent', () => {
 
   it('requires a positive amount and a currency from reference data', async () => {
     await setup();
+    fillValidSource(fixture.componentInstance);
+    fillValidBeneficiary(fixture.componentInstance);
     fixture.componentInstance.goNext();
     fixture.componentInstance.goNext();
     fixture.detectChanges();
@@ -335,6 +361,8 @@ describe('PaymentFormComponent', () => {
 
   it('requires purpose and remittance, and charge only for International', async () => {
     await setup();
+    fillValidSource(fixture.componentInstance);
+    fillValidBeneficiary(fixture.componentInstance);
     fixture.componentInstance.goNext();
     fixture.componentInstance.goNext();
     fixture.detectChanges();
@@ -344,14 +372,14 @@ describe('PaymentFormComponent', () => {
     expect(payment.purposeCode.invalid).toBe(true);
     expect(payment.remittanceInformation.invalid).toBe(true);
     expect(
-      fixture.nativeElement.querySelector('label[for="payment-purpose"]').classList.contains(
-        'is-required',
-      ),
+      fixture.nativeElement
+        .querySelector('label[for="payment-purpose"]')
+        .classList.contains('is-required'),
     ).toBe(true);
     expect(
-      fixture.nativeElement.querySelector('label[for="payment-remittance"]').classList.contains(
-        'is-required',
-      ),
+      fixture.nativeElement
+        .querySelector('label[for="payment-remittance"]')
+        .classList.contains('is-required'),
     ).toBe(true);
     expect(fixture.nativeElement.querySelector('#payment-charge')).toBeNull();
     expect(payment.chargeOption.disabled).toBe(true);
@@ -369,38 +397,34 @@ describe('PaymentFormComponent', () => {
     expect(payment.chargeOption.valid).toBe(true);
   });
 
-  it('shows a masked review summary and disables Submit until the form is valid', async () => {
+  it('shows a masked review summary of the full payload', async () => {
     await setup();
-    fixture.componentInstance.goNext();
-    fixture.componentInstance.goNext();
-    fixture.componentInstance.goNext();
-    fixture.detectChanges();
-
-    const submit = findButton(fixture, 'Submit');
-    expect(submit.disabled).toBe(true);
-    expect(fixture.nativeElement.textContent).toContain(
-      'Fix the required fields before confirming.',
-    );
-
     fillValidDomestic(fixture.componentInstance);
+    fixture.componentInstance.form.controls.beneficiary.controls.bankCode.setValue('NWBK');
+    openReview(fixture);
     TestBed.inject(ApplicationRef).tick();
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('**** **** **** 4412 · GBP');
-    expect(fixture.nativeElement.textContent).toContain('Acme Supplies Ltd');
-    expect(fixture.nativeElement.textContent).toContain('GBP 10.12');
-    expect(fixture.nativeElement.textContent).not.toContain('GB29CUBI0000000004412');
-    expect(submit.disabled).toBe(false);
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('**** **** **** 4412 · GBP');
+    expect(text).toContain('Acme Supplies Ltd');
+    expect(text).toContain('**** 4412');
+    expect(text).toContain('GBP 10.12');
+    expect(text).toContain('SUPP');
+    expect(text).toContain('Invoice 12');
+    expect(text).toContain('NWBK');
+    expect(text).not.toContain('GB29CUBI0000000004412');
+    expect(text).not.toContain('GB12ACME000004412');
+    expect(findButton(fixture, 'Submit').disabled).toBe(false);
   });
 
   it('requests an FX quote on the payment step when currencies differ', async () => {
     await setup();
+    fillValidDomestic(fixture.componentInstance);
     fixture.componentInstance.goNext();
     fixture.componentInstance.goNext();
     fixture.detectChanges();
     expect(fixture.componentInstance.currentStep()).toBe(3);
-
-    fillValidDomestic(fixture.componentInstance);
     fixture.componentInstance.form.controls.payment.controls.currency.setValue('EUR');
     TestBed.inject(ApplicationRef).tick();
 
@@ -541,12 +565,14 @@ describe('PaymentFormComponent', () => {
     fixture.componentInstance.goBack();
     expect(fixture.componentInstance.currentStep()).toBe(1);
 
+    fillValidDomestic(fixture.componentInstance);
     fixture.componentInstance.goNext();
     fixture.componentInstance.goNext();
     fixture.componentInstance.goNext();
     fixture.componentInstance.goNext();
     expect(fixture.componentInstance.currentStep()).toBe(4);
-    expect(fixture.componentInstance.canGoNext()).toBe(false);
+    expect(fixture.componentInstance.isLastStep()).toBe(true);
+    expect(fixture.componentInstance.canAdvance()).toBe(false);
   });
 
   it('renders Edit payment when the route has an id', async () => {
@@ -556,8 +582,8 @@ describe('PaymentFormComponent', () => {
 
   it('saves a draft with POST /payments and does not submit', async () => {
     await setup();
-    openReview(fixture);
     fillValidDomestic(fixture.componentInstance);
+    openReview(fixture);
     TestBed.inject(ApplicationRef).tick();
     fixture.detectChanges();
 
@@ -579,8 +605,8 @@ describe('PaymentFormComponent', () => {
   it('submits by creating then posting /submit', async () => {
     await setup();
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
-    openReview(fixture);
     fillValidDomestic(fixture.componentInstance);
+    openReview(fixture);
     TestBed.inject(ApplicationRef).tick();
     fixture.detectChanges();
 
@@ -596,8 +622,8 @@ describe('PaymentFormComponent', () => {
 
   it('updates an existing draft with PUT on Save draft', async () => {
     await setup('pay-021');
-    openReview(fixture);
     fillValidDomestic(fixture.componentInstance);
+    openReview(fixture);
     TestBed.inject(ApplicationRef).tick();
     fixture.detectChanges();
 
@@ -612,8 +638,8 @@ describe('PaymentFormComponent', () => {
 
   it('ignores a second Submit click while the first is in flight', async () => {
     await setup();
-    openReview(fixture);
     fillValidDomestic(fixture.componentInstance);
+    openReview(fixture);
     TestBed.inject(ApplicationRef).tick();
     fixture.detectChanges();
 
@@ -628,8 +654,8 @@ describe('PaymentFormComponent', () => {
 
   it('maps 422 fieldErrors onto the amount control', async () => {
     await setup();
-    openReview(fixture);
     fillValidDomestic(fixture.componentInstance);
+    openReview(fixture);
     TestBed.inject(ApplicationRef).tick();
     fixture.detectChanges();
 
@@ -653,8 +679,8 @@ describe('PaymentFormComponent', () => {
 
   it('reloads the payment on 409 and does not retry the mutation', async () => {
     await setup('pay-021');
-    openReview(fixture);
     fillValidDomestic(fixture.componentInstance);
+    openReview(fixture);
     TestBed.inject(ApplicationRef).tick();
     fixture.detectChanges();
 
@@ -748,16 +774,27 @@ describe('PaymentFormComponent', () => {
   }
 });
 
-function fillValidDomestic(component: PaymentFormComponent): void {
+function fillValidSource(
+  component: PaymentFormComponent,
+  type: PaymentType = PaymentType.Domestic,
+): void {
   component.form.controls.source.patchValue({
     debitAccountId: 'acc-4412',
-    type: PaymentType.Domestic,
+    type,
     executionDate: todayDateInputValue(),
   });
+}
+
+function fillValidBeneficiary(component: PaymentFormComponent): void {
   component.form.controls.beneficiary.patchValue({
     name: 'Acme Supplies Ltd',
     account: 'GB12ACME000004412',
   });
+}
+
+function fillValidDomestic(component: PaymentFormComponent): void {
+  fillValidSource(component);
+  fillValidBeneficiary(component);
   component.form.controls.payment.patchValue({
     amount: 10.12,
     currency: 'GBP',

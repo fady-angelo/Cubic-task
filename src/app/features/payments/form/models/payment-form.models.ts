@@ -37,7 +37,15 @@ export type PaymentForm = FormGroup<{
 export interface PaymentReviewSummary {
   debitAccount: string;
   beneficiary: string;
+  beneficiaryAccount: string;
   amount: string;
   type: string;
   executionDate: string;
+  purposeCode: string;
+  remittanceInformation: string;
+  bankCode: string;
+  swift: string;
+  country: string;
+  address: string;
+  chargeOption: string;
 }
